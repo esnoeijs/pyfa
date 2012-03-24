@@ -22,6 +22,7 @@ import config
 import bitmapLoader
 import gui.mainFrame
 import gui.graphFrame
+import gui.dpsmapFrame
 import gui.globalEvents as GE
 
 class MainMenuBar(wx.MenuBar):
@@ -29,6 +30,7 @@ class MainMenuBar(wx.MenuBar):
         self.characterEditorId = wx.NewId()
         self.damagePatternEditorId = wx.NewId()
         self.graphFrameId = wx.NewId()
+        self.dpsmapFrameId = wx.NewId()
         self.backupFitsId = wx.NewId()
         self.preferencesId = wx.NewId()
 
@@ -77,6 +79,10 @@ class MainMenuBar(wx.MenuBar):
         damagePatternEditItem.SetBitmap(bitmapLoader.getBitmap("damagePattern_small", "icons"))
         windowMenu.AppendItem(damagePatternEditItem)
 
+        dpsMapFrameItem = wx.MenuItem(windowMenu, self.dpsmapFrameId, "DPS map")
+        dpsMapFrameItem.SetBitmap(bitmapLoader.getBitmap("graphs_small", "icons"))
+        windowMenu.AppendItem(dpsMapFrameItem)
+        
         graphFrameItem = wx.MenuItem(windowMenu, self.graphFrameId, "Graphs\tCTRL+G")
         graphFrameItem.SetBitmap(bitmapLoader.getBitmap("graphs_small", "icons"))
         windowMenu.AppendItem(graphFrameItem)
@@ -96,8 +102,6 @@ class MainMenuBar(wx.MenuBar):
 
         if config.debug:
             helpMenu.Append( self.mainFrame.widgetInspectMenuID, "Open Widgets Inspect tool", "Open Widgets Inspect tool")
-
-
 
         self.mainFrame.Bind(GE.FIT_CHANGED, self.fitChanged)
 

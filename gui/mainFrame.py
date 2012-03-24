@@ -45,6 +45,7 @@ from gui.characterSelection import CharacterSelection
 from gui.patternEditor import DmgPatternEditorDlg
 from gui.preferenceDialog import PreferenceDialog
 from gui.graphFrame import GraphFrame
+from gui.dpsmapFrame import DpsmapFrame
 from gui.copySelectDialog import CopySelectDialog
 from gui.utils.clipboard import toClipboard, fromClipboard
 from gui.fleetBrowser import FleetBrowser
@@ -151,6 +152,7 @@ class MainFrame(wx.Frame):
 
         #Internal vars to keep track of other windows (graphing/stats)
         self.graphFrame = None
+        self.dpsmapFrame = None
         self.statsWnds = []
         self.activeStatsWnd = None
 
@@ -343,6 +345,9 @@ class MainFrame(wx.Frame):
 
         #Graphs
         self.Bind(wx.EVT_MENU, self.openGraphFrame, id=menuBar.graphFrameId)
+        
+        #DPS Map
+        self.Bind(wx.EVT_MENU, self.openDpsmapFrame, id=menuBar.dpsmapFrameId)
 
         toggleShipMarketId = wx.NewId()
         ctabnext = wx.NewId()
@@ -480,7 +485,15 @@ class MainFrame(wx.Frame):
                 self.graphFrame.Show()
         else:
             self.graphFrame.SetFocus()
-
+    
+    def openDpsmapFrame(self, event):
+        if not self.dpsmapFrame:
+            self.dpsmapFrame = DpsmapFrame(self)
+            if gui.dpsmapFrame.enabled:
+                self.dpsmapFrame.Show()
+        else:
+            self.dpsmapFrame.SetFocus()        
+        
     def openWXInspectTool(self,event):
         from wx.lib.inspection import InspectionTool
         if not InspectionTool().initialized:
