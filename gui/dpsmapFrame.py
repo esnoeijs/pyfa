@@ -45,6 +45,7 @@ class DpsmapFrame(wx.Frame):
                 mpl.use('wxagg')
             from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
             from matplotlib.figure import Figure
+            import matplotlib.pyplot as pyplot;
             enabled = True
             if mpl.__version__[0] != "1":
                 print "pyfa: Found matplotlib version ",mpl.__version__, " - activating OVER9000 workarounds"
@@ -57,7 +58,7 @@ class DpsmapFrame(wx.Frame):
 
         mplImported = True
 
-        wx.Frame.__init__(self, parent, title=u"pyfa: DPS Graph Generator", style=style, size=(520, 390))
+        wx.Frame.__init__(self, parent, title=u"pyfa: DPS map Generator", style=style, size=(520, 390))
 
         i = wx.IconFromBitmap(bitmapLoader.getBitmap("graphs_small", "icons"))
         self.SetIcon(i)
@@ -79,17 +80,23 @@ class DpsmapFrame(wx.Frame):
         self.mainSizer.Add(self.graphSelection, 0, wx.EXPAND)
 
         self.figure = Figure(figsize=(4, 3))
-
+        
         rgbtuple = wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNFACE ).Get()
         clr = [c/255. for c in rgbtuple]
         self.figure.set_facecolor( clr )
         self.figure.set_edgecolor( clr )
 
+        
+                              
+        emptyGrid = [ [0 for col in range(75) ] for row in range(75)]
+        self.subplot = self.figure.figimage(emptyGrid);
+#        self.subplot.grid(True)
+
+        print self.subplot;
         self.canvas = Canvas(self, -1, self.figure)
         self.canvas.SetBackgroundColour( wx.Colour( *rgbtuple ) )
 
-        self.subplot = self.figure.add_subplot(111)
-        self.subplot.grid(True)
+
 
         self.mainSizer.Add(self.canvas, 1, wx.EXPAND)
         self.mainSizer.Add(wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL ), 0 , wx.EXPAND)
@@ -185,40 +192,86 @@ class DpsmapFrame(wx.Frame):
     def draw(self, event=None):
         values = self.getValues()
         view = self.getView()
-        self.subplot.clear()
-        self.subplot.grid(True)
+#        self.subplot.clear()
+#        self.subplot.grid(True)
         legend = []
-
+        print "draw"
         for fit in self.fits:
-            try:
-                success, status = view.getPoints(fit, values)
-                if not success:
-                    #TODO: Add a pwetty statys bar to report errors with
-                    self.SetStatusText(status)
-                    return
-
-                x, y = success, status
-
-                self.subplot.plot(x, y)
+#            try:
+                print values;
+                dmgGridArray = [];
+                for trans in range(100):
+#                    values['angle'] = trans;
+                    success, status = view.getPoints(fit, values)
+                    if not success:
+                        #TODO: Add a pwetty statys bar to report errors with
+                        self.SetStatusText(status)
+                        return
+                    
+                    rangeLimit, dps = success, status
+                    
+                    i = 0;
+                    dpsArray = [];
+                    print dps;
+                    print rangeLimit;
+                    print len(dps);
+                    print len(rangeLimit);
+                    for gridRange in range(200):
+                        if gridRange/10 > rangeLimit[i]:
+                            i = i + 1
+                        if i > len(rangeLimit)-1: 
+                            break;
+                        print i;
+                        dpsArray.append(dps[i]);
+                    print dpsArray;
+                    dmgGridArray.append(dpsArray);
+                
+#                self.subplot.plot(x, y)
+#                print x;
+#                print y;
+                # x = range
+                # y = dps
+#                print dmgGridArray;
+#                print y;
+                
+                import numpy as np
+                
+                x = np.arange(6)
+                y = np.arange(5)
+                z = x * y[:,np.newaxis]
+                
+                self.figure.set_size_inches(10,10);
+                self.subplot.set_data(dmgGridArray);
+                self.subplot.changed();
+                self.subplot.autoscale();
+                
+                
+                self.subplot.changed();
+#                self.subplot = pyplot.imshow(z);
+#                self.figure = pyplot.gcf()
+                self.subplot.changed()
+                
                 legend.append(fit.name)
-            except:
-                self.SetStatusText("Invalid values in '%s'" % fit.name)
+#            except:
+#                print "exception";
+#                self.SetStatusText("Invalid values in '%s'" % fit.name)
 
-        if self.legendFix and len(legend) > 0:
-            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False)
-            for t in leg.get_texts():
-                t.set_fontsize('small')
 
-            for l in leg.get_lines():
-                l.set_linewidth(1)
-
-        elif not self.legendFix and len(legend) >0:
-            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False, frameon = False)
-            for t in leg.get_texts():
-                t.set_fontsize('small')
-
-            for l in leg.get_lines():
-                l.set_linewidth(1)
+#        if self.legendFix and len(legend) > 0:
+#            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False)
+#            for t in leg.get_texts():
+#                t.set_fontsize('small')
+#
+#            for l in leg.get_lines():
+#                l.set_linewidth(1)
+#
+#        elif not self.legendFix and len(legend) >0:
+#            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False, frameon = False)
+#            for t in leg.get_texts():
+#                t.set_fontsize('small')
+#
+#            for l in leg.get_lines():
+#                l.set_linewidth(1)
 
         self.canvas.draw()
         self.SetStatusText("")
