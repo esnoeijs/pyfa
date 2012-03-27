@@ -85,18 +85,24 @@ class DpsmapFrame(wx.Frame):
         clr = [c/255. for c in rgbtuple]
         self.figure.set_facecolor( clr )
         self.figure.set_edgecolor( clr )
-
         
                               
         emptyGrid = [ [0 for col in range(75) ] for row in range(75)]
-        self.subplot = self.figure.figimage(emptyGrid);
+        #self.subplot = self.figure.figimage(emptyGrid, interpolation='nearest');
+        
+        #self.subplot = pyplot.imshow(emptyGrid, interpolation='nearest');
+        
 #        self.subplot.grid(True)
 
-        print self.subplot;
         self.canvas = Canvas(self, -1, self.figure)
         self.canvas.SetBackgroundColour( wx.Colour( *rgbtuple ) )
 
 
+#        pyplot.imshow(emptyGrid, interpolation='bilinear', origin='lower', extent=[-3,3,-3,3])
+        
+        self.subplot = self.figure.add_subplot(111)
+        
+#        self.ax = self.figure.add_axes([0.2,0.2,0.5,0.7])
 
         self.mainSizer.Add(self.canvas, 1, wx.EXPAND)
         self.mainSizer.Add(wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL ), 0 , wx.EXPAND)
@@ -125,7 +131,7 @@ class DpsmapFrame(wx.Frame):
         self.fitList.fitList.Bind(wx.EVT_LEFT_DCLICK, self.removeItem)
         self.mainFrame.Bind(GE.FIT_CHANGED, self.draw)
         self.Bind(wx.EVT_CLOSE, self.close)
-
+        
         self.Fit()
         self.SetMinSize(self.GetSize())
 
@@ -200,58 +206,27 @@ class DpsmapFrame(wx.Frame):
 #            try:
                 print values;
                 dmgGridArray = [];
-                for trans in range(100):
+                
 #                    values['angle'] = trans;
-                    success, status = view.getPoints(fit, values)
-                    if not success:
-                        #TODO: Add a pwetty statys bar to report errors with
-                        self.SetStatusText(status)
-                        return
-                    
-                    rangeLimit, dps = success, status
-                    
-                    i = 0;
-                    dpsArray = [];
-                    print dps;
-                    print rangeLimit;
-                    print len(dps);
-                    print len(rangeLimit);
-                    for gridRange in range(200):
-                        if gridRange/10 > rangeLimit[i]:
-                            i = i + 1
-                        if i > len(rangeLimit)-1: 
-                            break;
-                        print i;
-                        dpsArray.append(dps[i]);
-                    print dpsArray;
-                    dmgGridArray.append(dpsArray);
+                dpsMatrix = view.getDpsMatrix(fit, 200, 20, 1, 1000, 10 )
                 
-#                self.subplot.plot(x, y)
-#                print x;
-#                print y;
-                # x = range
-                # y = dps
-#                print dmgGridArray;
-#                print y;
+                import matplotlib.pyplot as pyplot;
+                self.subplot.imshow(dpsMatrix);
+#                im = pyplot.imshow(dpsMatrix);
+#                self.subplot.set_axes(im);
+#                self.figure.add_axes(im);
+#                self.canvas.draw();
+                #hank = self.figure.figimage(dpsMatrix);
+                #hank.set_axes(self.subplot);
+
                 
-                import numpy as np
-                
-                x = np.arange(6)
-                y = np.arange(5)
-                z = x * y[:,np.newaxis]
-                
-                self.figure.set_size_inches(10,10);
-                self.subplot.set_data(dmgGridArray);
-                self.subplot.changed();
-                self.subplot.autoscale();
+#                self.subplot.set_data(dpsMatrix);
+#                self.subplot.changed();
+#                self.subplot.autoscale();
                 
                 
-                self.subplot.changed();
-#                self.subplot = pyplot.imshow(z);
-#                self.figure = pyplot.gcf()
-                self.subplot.changed()
                 
-                legend.append(fit.name)
+#                legend.append(fit.name)
 #            except:
 #                print "exception";
 #                self.SetStatusText("Invalid values in '%s'" % fit.name)
