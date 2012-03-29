@@ -80,29 +80,16 @@ class DpsmapFrame(wx.Frame):
         self.mainSizer.Add(self.graphSelection, 0, wx.EXPAND)
 
         self.figure = Figure(figsize=(4, 3))
-        
+        self.colorBar = None;
         rgbtuple = wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNFACE ).Get()
         clr = [c/255. for c in rgbtuple]
         self.figure.set_facecolor( clr )
         self.figure.set_edgecolor( clr )
         
-                              
-        emptyGrid = [ [0 for col in range(75) ] for row in range(75)]
-        #self.subplot = self.figure.figimage(emptyGrid, interpolation='nearest');
-        
-        #self.subplot = pyplot.imshow(emptyGrid, interpolation='nearest');
-        
-#        self.subplot.grid(True)
-
         self.canvas = Canvas(self, -1, self.figure)
         self.canvas.SetBackgroundColour( wx.Colour( *rgbtuple ) )
 
-
-#        pyplot.imshow(emptyGrid, interpolation='bilinear', origin='lower', extent=[-3,3,-3,3])
-        
         self.subplot = self.figure.add_subplot(111)
-        
-#        self.ax = self.figure.add_axes([0.2,0.2,0.5,0.7])
 
         self.mainSizer.Add(self.canvas, 1, wx.EXPAND)
         self.mainSizer.Add(wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL ), 0 , wx.EXPAND)
@@ -206,47 +193,37 @@ class DpsmapFrame(wx.Frame):
 #            try:
                 print values;
                 dmgGridArray = [];
-                
 #                    values['angle'] = trans;
-                dpsMatrix = view.getDpsMatrix(fit, 200, 20, 1, 1000, 10 )
+                dpsMatrix = view.getDpsMatrix(fit, 200, 20, 1, 2000, 10 )
                 
                 import matplotlib.pyplot as pyplot;
-                self.subplot.imshow(dpsMatrix);
-#                im = pyplot.imshow(dpsMatrix);
-#                self.subplot.set_axes(im);
-#                self.figure.add_axes(im);
-#                self.canvas.draw();
-                #hank = self.figure.figimage(dpsMatrix);
-                #hank.set_axes(self.subplot);
-
+                imgraph = self.subplot.imshow(dpsMatrix, aspect=30, extent=[0,2000,0,20]);
                 
-#                self.subplot.set_data(dpsMatrix);
-#                self.subplot.changed();
-#                self.subplot.autoscale();
-                
-                
-                
-#                legend.append(fit.name)
+                if self.colorBar is None:
+                    self.colorBar = self.figure.colorbar(imgraph);
+                else:
+                    self.colorBar.update_bruteforce(imgraph);
+                legend.append(fit.name)
 #            except:
 #                print "exception";
 #                self.SetStatusText("Invalid values in '%s'" % fit.name)
 
 
-#        if self.legendFix and len(legend) > 0:
-#            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False)
-#            for t in leg.get_texts():
-#                t.set_fontsize('small')
-#
-#            for l in leg.get_lines():
-#                l.set_linewidth(1)
-#
-#        elif not self.legendFix and len(legend) >0:
-#            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False, frameon = False)
-#            for t in leg.get_texts():
-#                t.set_fontsize('small')
-#
-#            for l in leg.get_lines():
-#                l.set_linewidth(1)
+        if self.legendFix and len(legend) > 0:
+            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False)
+            for t in leg.get_texts():
+                t.set_fontsize('small')
+
+            for l in leg.get_lines():
+                l.set_linewidth(1)
+
+        elif not self.legendFix and len(legend) >0:
+            leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False, frameon = False)
+            for t in leg.get_texts():
+                t.set_fontsize('small')
+
+            for l in leg.get_lines():
+                l.set_linewidth(1)
 
         self.canvas.draw()
         self.SetStatusText("")

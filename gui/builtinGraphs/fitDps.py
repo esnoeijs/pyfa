@@ -78,20 +78,26 @@ class FitDpsGraph(Graph):
         from eos.types import Hardpoint, State
         from math import log, sin, radians
         
+        rangeMax = rangeMax + 1;
+        
         dpsMatrix = [];        
-        for range in xrange(1, rangeMax, rangeStep):
+        for dist in [x * rangeStep for x in range(1, rangeMax*10)]:
+            
+            dist = rangeMax - dist; # There is probably a better way to reverse this.
+            if (dist==0): break;
+            print dist;
             transArray = []
             for trans in xrange(1, transversalMax, transStep):
-                distance = range * 1000
+                distance = dist * 1000
                 total = 0
                 for mod in fit.modules:
                     if mod.hardpoint == Hardpoint.TURRET:
                         if mod.state >= State.ACTIVE:
-                            total += mod.dps * self._calcTurrentDmg(mod, range, trans, signature)
+                            total += mod.dps * self._calcTurrentDmg(mod, dist, trans, signature)
                 
                 transArray.append(total);
             dpsMatrix.append(transArray);
-        
+
         return dpsMatrix;
     
     '''
