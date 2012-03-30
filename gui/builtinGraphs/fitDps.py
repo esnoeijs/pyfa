@@ -65,39 +65,31 @@ class FitDpsGraph(Graph):
     '''
     Will return a 2d matrix of dmg over distance and transversal.
     
-    @todo implement
+    range is given in meters.
     '''
     def getDpsMatrix(self, fit, signature, rangeMax, rangeStep, transversalMax, transStep):
-        
         fitDps = getattr(self, "fitDps", None)
         if fitDps is None or fitDps.fit != fit:
             fitDps = self.fitDps = FitDps(fit)
         
-        
         from eos.graph import Graph, Data
         from eos.types import Hardpoint, State
         from math import log, sin, radians
-        
-        rangeMax = rangeMax + 1;
-        
+               
         dpsMatrix = [];        
-        for dist in [x * rangeStep for x in range(1, rangeMax*10)]:
-            
-            dist = rangeMax - dist; # There is probably a better way to reverse this.
-            if (dist==0): break;
-            print dist;
+        for dist in xrange(1, rangeMax, rangeStep):
             transArray = []
             for trans in xrange(1, transversalMax, transStep):
-                distance = dist * 1000
-                total = 0
+                total = 0               
                 for mod in fit.modules:
                     if mod.hardpoint == Hardpoint.TURRET:
                         if mod.state >= State.ACTIVE:
                             total += mod.dps * self._calcTurrentDmg(mod, dist, trans, signature)
-                
+        
                 transArray.append(total);
             dpsMatrix.append(transArray);
 
+        
         return dpsMatrix;
     
     '''
@@ -105,7 +97,6 @@ class FitDpsGraph(Graph):
     Calculates turrent dmg based on range and transversal, returns dps
     '''
     def _calcTurrentDmg(self, mod, range, trans, targetSig):
-        distance = range * 1000
         tracking = mod.getModifiedItemAttr("trackingSpeed")
         turretOptimal = mod.maxRange
         turretFalloff = mod.falloff
@@ -113,9 +104,10 @@ class FitDpsGraph(Graph):
         targetSigRad = targetSig;
         targetSigRad = turretSigRes if targetSigRad is None else targetSigRad
         transversal = trans; #sin(radians(data["angle"])) * data["velocity"]
-        trackingEq = (((transversal / (distance * tracking)) *
+         
+        trackingEq = (((transversal / (range * tracking)) *
                        (turretSigRes / targetSigRad)) ** 2)
-        rangeEq = ((max(0, distance - turretOptimal)) / turretFalloff) ** 2
+        rangeEq = ((max(0, range - turretOptimal)) / turretFalloff) ** 2
         
         chanceToHit = 0.5 ** (trackingEq + rangeEq);
         

@@ -192,12 +192,17 @@ class DpsmapFrame(wx.Frame):
         for fit in self.fits:
 #            try:
                 print values;
+                signature   = 94;
+                transMax    = 500;
+                transStep   = 20;
+                distanceMax = 20000;
+                distStep    = 200;
                 dmgGridArray = [];
-#                    values['angle'] = trans;
-                dpsMatrix = view.getDpsMatrix(fit, 200, 20, 1, 2000, 10 )
+
+                dpsMatrix = view.getDpsMatrix(fit, signature, distanceMax, distStep, transMax, transStep )
                 
                 import matplotlib.pyplot as pyplot;
-                imgraph = self.subplot.imshow(dpsMatrix, aspect=30, extent=[0,2000,0,20]);
+                imgraph = self.subplot.imshow(dpsMatrix, aspect=25, extent=[0,transMax,0,distanceMax/1000], interpolation=None, origin='lower', );
                 
                 if self.colorBar is None:
                     self.colorBar = self.figure.colorbar(imgraph);
