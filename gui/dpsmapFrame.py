@@ -137,7 +137,14 @@ class DpsmapFrame(wx.Frame):
     def getValues(self):
         values = {}
         for fieldName, field in self.fields.iteritems():
-            values[fieldName] = field.GetValue()
+            if fieldName == 'signatureRadius':
+                try:
+                    tmp = float(field.GetValue());
+                except:
+                    tmp = 0;
+                values[fieldName] = tmp;
+            else:
+                values[fieldName] = field.GetValue()
 
         return values
 
@@ -188,31 +195,49 @@ class DpsmapFrame(wx.Frame):
 #        self.subplot.clear()
 #        self.subplot.grid(True)
         legend = []
+        
+        import numpy;
         print "draw"
+        first = True;
         for fit in self.fits:
 #            try:
-                print values;
-                signature   = 94;
+                signature   = values['signatureRadius'];
                 transMax    = 500;
-                transStep   = 20;
+                transStep   = 10;
                 distanceMax = 20000;
                 distStep    = 200;
                 dmgGridArray = [];
 
-                dpsMatrix = view.getDpsMatrix(fit, signature, distanceMax, distStep, transMax, transStep )
-                
-                import matplotlib.pyplot as pyplot;
-                imgraph = self.subplot.imshow(dpsMatrix, aspect=25, extent=[0,transMax,0,distanceMax/1000], interpolation=None, origin='lower', );
-                
-                if self.colorBar is None:
-                    self.colorBar = self.figure.colorbar(imgraph);
+                if (first):
+                    dpsMatrix = view.getDpsMatrix(fit, signature, distanceMax, distStep, transMax, transStep )
                 else:
-                    self.colorBar.update_bruteforce(imgraph);
-                legend.append(fit.name)
+                    substractMatrix = view.getDpsMatrix(fit, signature, distanceMax, distStep, transMax, transStep )
+                    newDpsMatrix = [];
+                    for row1, row2 in zip(dpsMatrix, substractMatrix):
+                        newRow = [];
+                        print len(row1);
+                        for i in xrange(0, len(row1) - 1):
+                            newRow.append(row1[i] - row2[i]);
+                           
+                        newDpsMatrix.append(newRow);
+                        
+                    dpsMatrix = newDpsMatrix;
+                
+                first = False;
 #            except:
 #                print "exception";
 #                self.SetStatusText("Invalid values in '%s'" % fit.name)
 
+
+        import matplotlib.pyplot as pyplot;
+        imgraph = self.subplot.imshow(dpsMatrix, aspect=25, extent=[0,transMax,0,distanceMax/1000], interpolation=None, origin='lower', );
+        
+        if self.colorBar is None:
+            self.colorBar = self.figure.colorbar(imgraph);
+        else:
+            self.colorBar.update_bruteforce(imgraph);
+        legend.append(fit.name)
+    
 
         if self.legendFix and len(legend) > 0:
             leg = self.subplot.legend(tuple(legend), "upper right" , shadow = False)

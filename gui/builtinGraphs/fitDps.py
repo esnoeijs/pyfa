@@ -28,19 +28,20 @@ import service
 class FitDpsGraph(Graph):
     propertyAttributeMap = {"angle": "maxVelocity",
                             "distance": "maxRange",
-                            "signatureRadius": "signatureRadius",
-                            "velocity": "maxVelocity"}
+                            "signatureRadius": "signatureRadius"
+                            }
 
     propertyLabelMap = {"angle": "Target Angle (degrees)",
                         "distance": "Distance to Target (km)",
-                        "signatureRadius": "Target Signature Radius (m)",
-                        "velocity": "Target Velocity (m/s)"}
+                        "signatureRadius": "Target Signature Radius (m)"
+                        }
 
     defaults = FitDps.defaults.copy()
 
     def __init__(self):
         Graph.__init__(self)
         self.defaults["distance"] = "0-20"
+        self.defaults["signatureRadius"] = 195;
         self.name = "DPS"
         self.fitDps = None
         self.mainFrame = gui.mainFrame.MainFrame.getInstance()
