@@ -33,7 +33,11 @@ class exportHtmlThread(threading.Thread):
             <script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
         </head> 
         <body>
-        <div data-role="page"> 
+        <div  id="canvas" data-role="page"> 
+            <div data-role="header">
+                <h1>PyFa fits</h1>
+            </div>
+            <div data-role="content">     
         """     
         
         HTML += '<ul data-role="listview" data-inset="true" data-filter="true">';
@@ -54,9 +58,10 @@ class exportHtmlThread(threading.Thread):
                    HTML += HTMLship
 
         HTML += """
-        </ul>
+                </ul>           
+            </div>
         </div>
-        </body>"
+        </body>
         """
         
         FILE = open(settings.getPath(), "w")
