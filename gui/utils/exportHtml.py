@@ -1,26 +1,45 @@
 import threading
-import wx
+import time
 import service
 
 class exportHtml():
+    _instance = None
+    @classmethod
+    def getInstance(cls):
+        if cls._instance == None:
+            cls._instance = exportHtml()
+
+        return cls._instance
+    
+    def __init__(self):
+        self.thread = exportHtmlThread()
     
     def refreshFittingHTMl(self):
         settings = service.settings.HTMLExportSettings.getInstance()
-        
+
         if (settings.getEnabled()):
-            thread = exportHtmlThread()
-            thread.start()
+            self.thread.stop()
+            self.thread = exportHtmlThread()
+            self.thread.start()
 
 class exportHtmlThread(threading.Thread):
     
     def __init__(self):
         threading.Thread.__init__(self)
+        self.stopRunning = False
 
+    def stop(self):
+        self.stopRunning = True
+        
     def run(self):
+        # wait 1 second just in case a lot of modifications get made
+        time.sleep(1);
+        if self.stopRunning: 
+            return;
+
         sMarket = service.Market.getInstance()
         sFit    = service.Fit.getInstance()
         settings = service.settings.HTMLExportSettings.getInstance()
-
         
         HTML = """
         <!DOCTYPE html> 
@@ -50,6 +69,8 @@ class exportHtmlThread(threading.Thread):
                HTMLship = '<li><h2>' + ship.name + '</h2><ul>'
                fits = sFit.getFitsWithShip(ship.ID)
                for fit in fits:
+                   if self.stopRunning: 
+                       return;
                    dnaFit = sFit.exportDna(fit[0])
                    HTMLship += "<li><a href=\"javascript:CCPEVE.showFitting('" + dnaFit + "');\" >" + fit[1] + "</a></li>"
 
@@ -67,5 +88,4 @@ class exportHtmlThread(threading.Thread):
         FILE = open(settings.getPath(), "w")
         FILE.write(HTML);
         FILE.close();
-        print "write done"
         
