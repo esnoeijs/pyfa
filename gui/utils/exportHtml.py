@@ -5,17 +5,22 @@ import service
 class exportHtml():
     
     def refreshFittingHTMl(self):
-        thread = exportHtmlThread()
-        thread.start()
+        settings = service.settings.HTMLExportSettings.getInstance()
+        
+        if (settings.getEnabled()):
+            thread = exportHtmlThread()
+            thread.start()
 
 class exportHtmlThread(threading.Thread):
     
     def __init__(self):
         threading.Thread.__init__(self)
-        
+
     def run(self):
         sMarket = service.Market.getInstance()
-        sFit = service.Fit.getInstance()
+        sFit    = service.Fit.getInstance()
+        settings = service.settings.HTMLExportSettings.getInstance()
+
         
         HTML = """
         <!DOCTYPE html> 
@@ -54,7 +59,7 @@ class exportHtmlThread(threading.Thread):
         </body>"
         """
         
-        FILE = open("/home/erik/Desktop/fittings.html","w")
+        FILE = open(settings.getPath(), "w")
         FILE.write(HTML);
         FILE.close();
         print "write done"
