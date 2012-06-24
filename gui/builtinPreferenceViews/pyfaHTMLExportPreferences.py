@@ -1,6 +1,7 @@
 import wx
 import service
 import urllib2
+import os
 
 from gui.preferenceView import PreferenceView
 from gui import bitmapLoader
@@ -45,11 +46,11 @@ class PFHTMLExportPref ( PreferenceView):
         self.stPSetPath.Wrap( -1 )
 
         self.PathTextCtrl = wx.TextCtrl( panel, wx.ID_ANY, self.HTMLExportSettings.getPath(), wx.DefaultPosition, wx.DefaultSize, 0)
-        self.PathTextCtrl.SetEditable(False)
+        self.PathTextCtrl.Disable()
         
         self.fileSelectDialog = wx.FileDialog(None, "Save Fitting As...", wildcard = "EvE IGB HTML fitting file (*.html)|*.html", style = wx.FD_SAVE)
         self.fileSelectDialog.SetPath(self.HTMLExportSettings.getPath())
-        self.fileSelectDialog.SetFilename('pyfaFits.html');
+        self.fileSelectDialog.SetFilename(os.path.basename(self.HTMLExportSettings.getPath()));
         self.fileSelectButton = wx.Button(panel, -1, "Set export destination", pos=(0,0)) 
         self.fileSelectButton.Bind(wx.EVT_BUTTON, self.selectHTMLExportFilePath)
         
@@ -74,6 +75,7 @@ class PFHTMLExportPref ( PreferenceView):
         if self.fileSelectDialog.ShowModal() == wx.ID_OK:
             self.exportFilePath = self.fileSelectDialog.GetPath()
             self.dirtySettings = True
+            self.PathTextCtrl.SetValue(self.exportFilePath)
             self.UpdateApplyButtonState()
 
     def OnExportEnabledChange(self, event):

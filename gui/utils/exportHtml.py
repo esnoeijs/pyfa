@@ -84,8 +84,12 @@ class exportHtmlThread(threading.Thread):
         </div>
         </body>
         """
-        
-        FILE = open(settings.getPath(), "w")
-        FILE.write(HTML);
-        FILE.close();
+    
+        try:
+            FILE = open(settings.getPath(), "w")
+            FILE.write(HTML);
+            FILE.close();
+        except IOError:
+            print "Failed to write to " + settings.getPath()
+            pass
         

@@ -199,7 +199,7 @@ class HTMLExportSettings():
         return cls._instance    
 
     def __init__(self):
-        serviceHTMLExportDefaultSettings = {"enabled": False, "path": ""}
+        serviceHTMLExportDefaultSettings = {"enabled": False, "path4": config.pyfaPath + os.sep + 'pyfaFits.html' }
         self.serviceHTMLExportSettings = SettingsProvider.getInstance().getSettings("pyfaServiceHTMLExportSettings", serviceHTMLExportDefaultSettings)
     
     def getEnabled(self):
@@ -209,7 +209,7 @@ class HTMLExportSettings():
         self.serviceHTMLExportSettings["enabled"] = enabled
     
     def getPath(self):
-        return self.serviceHTMLExportSettings["path"]
+        return self.serviceHTMLExportSettings["path4"]
     
     def setPath(self, path):
-        self.serviceHTMLExportSettings["path"] = path
+        self.serviceHTMLExportSettings["path4"] = path
